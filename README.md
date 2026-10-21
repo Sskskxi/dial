@@ -2,7 +2,7 @@
 
 <h1 align="center">Dial</h1>
 
-<p align="center">A radial menu for your files on macOS. Select a file, tap a key, and convert, edit or share it from a wheel that opens right on top of it.</p>
+<p align="center">A radial menu for your files on macOS. Select a file, double-tap a key, and convert, edit or share it from a wheel that opens right on top of it.</p>
 
 ---
 
@@ -28,16 +28,16 @@ This downloads the latest release into `/Applications`, installs `ffmpeg` and `w
 
 ## Use
 
-Select files in Finder, then **tap** a key on its own:
+Select files in Finder, then **double-tap** a key on its own:
 
-| Tap | Wheel |
+| Double-tap | Wheel |
 |---|---|
 | ⇧ Shift | **Convert** to another format |
 | ⌥⇧ Option + Shift | **Tools** for that kind of file |
 | ⌘ Command | **Actions**: AirDrop, Float, Copy, Copy To, Move To, Copy Path, Terminal |
 | ⌥ Option | **File menu**: Open, Open With, Quick Look, Get Info, Rename, Duplicate, Copy, Trash |
 
-Click an item to run it, or tap again / press Esc to close. You can also hold ⇧, ⌥⇧ or ⌃ **while dragging** a file and drop it on the wheel.
+Click an item to run it. Tap the key once, or press Esc, to close. You can also hold ⇧, ⌥⇧ or ⌃ **while dragging** a file and drop it on the wheel.
 
 Results are saved next to the original and revealed in Finder. Several files at once are processed as a batch.
 

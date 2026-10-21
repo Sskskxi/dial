@@ -22,6 +22,7 @@ final class DragWatcher {
     // Modifier-tap state: a quick press-and-release of modifiers with nothing else in between.
     private var tapStart: Date?
     private var tapFlags: CGEventFlags = []
+    private var lastTap: (time: Date, mode: WheelMode)?
 
     func start() {
         baseline = pasteboard.changeCount
@@ -75,8 +76,8 @@ final class DragWatcher {
         if wheel.show(urls, mode: mode, at: point, dragMode: true) { shownMode = mode }
     }
 
-    /// Tapping ⇧ (or ⌥⇧ / ⌘ / ⌥) on its own while Finder is frontmost opens the wheel for the selection;
-    /// tapping again closes it.
+    /// Double-tapping ⇧ (or ⌥⇧ / ⌘ / ⌥) while Finder is frontmost opens the wheel for the selection;
+    /// a single tap closes it.
     private func checkTap() {
         let watched: CGEventFlags = [.maskShift, .maskAlternate, .maskControl, .maskCommand]
         let flags = CGEventSource.flagsState(.combinedSessionState).intersection(watched)
@@ -114,8 +115,16 @@ final class DragWatcher {
         let wheel = WheelController.shared
         if wheel.isVisible && !wheel.dragMode {
             wheel.hide()
+            lastTap = nil
             return
         }
+
+        // Opening takes a second tap of the same kind.
+        guard let previous = lastTap, previous.mode == mode, Date().timeIntervalSince(previous.time) < 0.45 else {
+            lastTap = (Date(), mode)
+            return
+        }
+        lastTap = nil
 
         guard NSWorkspace.shared.frontmostApplication?.bundleIdentifier == "com.apple.finder" else { return }
         let urls = FinderSelection.read()
