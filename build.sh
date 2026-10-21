@@ -12,5 +12,6 @@ cp Info.plist "$APP/Contents/"
 codesign --force --sign - "$APP"
 mkdir -p ~/Applications
 rm -rf ~/Applications/Dial.app
+pkill -x Dial 2>/dev/null || true
 cp -R "$APP" ~/Applications/
 echo "Installed ~/Applications/Dial.app"
