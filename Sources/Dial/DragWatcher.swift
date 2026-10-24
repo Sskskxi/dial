@@ -22,7 +22,7 @@ final class DragWatcher {
     // Modifier-tap state: a quick press-and-release of modifiers with nothing else in between.
     private var tapStart: Date?
     private var tapFlags: CGEventFlags = []
-    private var lastTap: (time: Date, mode: WheelMode)?
+    private var lastTap: (time: Date, mode: WheelMode, count: Int)?
 
     func start() {
         baseline = pasteboard.changeCount
@@ -76,8 +76,8 @@ final class DragWatcher {
         if wheel.show(urls, mode: mode, at: point, dragMode: true) { shownMode = mode }
     }
 
-    /// Double-tapping ⇧ (or ⌥⇧ / ⌘ / ⌥) while Finder is frontmost opens the wheel for the selection;
-    /// a single tap closes it.
+    /// Double-tapping ⇧ (or ⌥⇧ / ⌘) while Finder is frontmost opens the wheel for the selection,
+    /// triple-tapping ⇧ opens the File menu wheel; a single tap closes it.
     private func checkTap() {
         let watched: CGEventFlags = [.maskShift, .maskAlternate, .maskControl, .maskCommand]
         let flags = CGEventSource.flagsState(.combinedSessionState).intersection(watched)
@@ -105,26 +105,32 @@ final class DragWatcher {
             mode = .tools
         } else if tapFlags == .maskShift {
             mode = .formats
-        } else if tapFlags == .maskAlternate {
-            mode = .menu
         } else {
             return
         }
 
-        // A single tap closes an open wheel.
         let wheel = WheelController.shared
+        let now = Date()
+        let count = lastTap.map { $0.mode == mode && now.timeIntervalSince($0.time) < 0.45 ? $0.count + 1 : 1 } ?? 1
+        lastTap = (now, mode, count)
+
+        // A third ⇧ tap right after the double tap swaps Convert for the File menu.
+        if count == 3 && mode == .formats && wheel.isVisible && !wheel.dragMode {
+            lastTap = nil
+            wheel.show(wheel.urls, mode: .menu, at: wheel.center, dragMode: false)
+            return
+        }
+
+        // A single tap closes an open wheel.
         if wheel.isVisible && !wheel.dragMode {
             wheel.hide()
             lastTap = nil
             return
         }
 
-        // Opening takes a second tap of the same kind.
-        guard let previous = lastTap, previous.mode == mode, Date().timeIntervalSince(previous.time) < 0.45 else {
-            lastTap = (Date(), mode)
-            return
-        }
-        lastTap = nil
+        // Opening takes a second tap of the same kind. ⇧ keeps counting so a third tap can follow.
+        guard count == 2 else { return }
+        if mode != .formats { lastTap = nil }
 
         guard NSWorkspace.shared.frontmostApplication?.bundleIdentifier == "com.apple.finder" else { return }
         let urls = FinderSelection.read()

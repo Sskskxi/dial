@@ -34,8 +34,8 @@ Select files in Finder, then **double-tap** a key on its own:
 |---|---|
 | ⇧ Shift | **Convert** to another format |
 | ⌥⇧ Option + Shift | **Tools** for that kind of file |
-| ⌘ Command | **Actions**: AirDrop, Float, Copy, Copy To, Move To, Copy Path, Terminal |
-| ⌥ Option | **File menu**: Open, Open With, Quick Look, Get Info, Rename, Duplicate, Copy, Trash |
+| ⌘ Command | **Actions**: AirDrop, Share, Float, Copy, Copy To, Move To, Copy Path, Terminal |
+| ⇧ Shift ×3 (triple-tap) | **File menu**: Open, Open With, Quick Look, Get Info, Rename, Duplicate, Copy, Share, Trash |
 
 Click an item to run it. Tap the key once, or press Esc, to close. You can also hold ⇧, ⌥⇧ or ⌃ **while dragging** a file and drop it on the wheel.
 

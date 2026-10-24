@@ -22,7 +22,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func buildMenu() -> NSMenu {
         let menu = NSMenu()
         menu.delegate = self
-        for hint in ["Select files in Finder, then double-tap:", "    ⇧ ⇧  Convert", "    ⌥⇧ ⌥⇧  Tools", "    ⌘ ⌘  Actions", "    ⌥ ⌥  File menu (like right-click)",
+        for hint in ["Select files in Finder, then double-tap:", "    ⇧ ⇧  Convert", "    ⌥⇧ ⌥⇧  Tools", "    ⌘ ⌘  Actions", "Triple-tap ⇧ ⇧ ⇧  File menu (like right-click)",
                      "Tap once to close", "…or hold ⇧ / ⌥⇧ / ⌃ while dragging a file"] {
             let item = NSMenuItem(title: hint, action: nil, keyEquivalent: "")
             item.isEnabled = false

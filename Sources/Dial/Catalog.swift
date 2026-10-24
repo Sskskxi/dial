@@ -281,6 +281,7 @@ enum Catalog {
                 NSApp.activate()
                 NSSharingService(named: .sendViaAirDrop)?.perform(withItems: urls)
             },
+            WheelItem(title: "Share…", symbol: "square.and.arrow.up") { urls in SharePicker.show(urls, at: WheelController.shared.center) },
             WheelItem(title: "Float", symbol: "pin") { urls in Shelf.shared.add(urls) },
             WheelItem(title: "Copy", symbol: "doc.on.doc") { urls in
                 NSPasteboard.general.clearContents()
@@ -338,6 +339,7 @@ enum Catalog {
                 NSPasteboard.general.writeObjects(urls as [NSURL])
                 Toast.show(urls.count == 1 ? "Copied \(urls[0].lastPathComponent)" : "Copied \(urls.count) files")
             },
+            WheelItem(title: "Share…", symbol: "square.and.arrow.up") { urls in SharePicker.show(urls, at: WheelController.shared.center) },
             WheelItem(title: "Trash", symbol: "trash") { urls in
                 NSWorkspace.shared.recycle(urls) { _, error in
                     Toast.show(error?.localizedDescription ?? (urls.count == 1 ? "Moved \(urls[0].lastPathComponent) to Trash" : "Moved \(urls.count) files to Trash"))
@@ -383,5 +385,27 @@ enum Catalog {
                 return target
             }
         }
+    }
+}
+
+/// The system Share menu, shown where the wheel was.
+enum SharePicker {
+    private static var anchor: NSPanel?
+    private static var picker: NSSharingServicePicker?
+
+    static func show(_ urls: [URL], at point: NSPoint) {
+        anchor?.orderOut(nil)
+        let panel = NSPanel(contentRect: NSRect(x: point.x, y: point.y, width: 1, height: 1),
+                            styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.level = .popUpMenu
+        panel.isReleasedWhenClosed = false
+        panel.orderFrontRegardless()
+        anchor = panel
+        let picker = NSSharingServicePicker(items: urls)
+        self.picker = picker
+        NSApp.activate()
+        if let view = panel.contentView { picker.show(relativeTo: view.bounds, of: view, preferredEdge: .minY) }
     }
 }
