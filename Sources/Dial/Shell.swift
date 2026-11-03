@@ -16,11 +16,13 @@ enum Shell {
 
     /// Runs a process and returns its stdout. `onLine` receives stdout lines as they arrive.
     @discardableResult
-    static func run(_ exe: String, _ args: [String], cwd: URL? = nil, onLine: ((String) -> Void)? = nil) throws -> String {
+    static func run(_ exe: String, _ args: [String], cwd: URL? = nil, env: [String: String] = [:],
+                    onLine: ((String) -> Void)? = nil) throws -> String {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: exe)
         process.arguments = args
         if let cwd { process.currentDirectoryURL = cwd }
+        if !env.isEmpty { process.environment = ProcessInfo.processInfo.environment.merging(env) { $1 } }
         let out = Pipe(), err = Pipe()
         process.standardOutput = out
         process.standardError = err

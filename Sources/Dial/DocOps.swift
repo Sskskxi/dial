@@ -15,7 +15,8 @@ enum PDFOps {
         return url
     }
 
-    static func toImages(_ url: URL, ext: String) throws -> [URL] {
+    /// One image per page, named after `original` (defaults to `url`) and saved beside it.
+    static func toImages(_ url: URL, ext: String, like original: URL? = nil) throws -> [URL] {
         let doc = try open(url)
         return try (0..<doc.pageCount).compactMap { i in
             guard let page = doc.page(at: i) else { return nil }
@@ -23,7 +24,7 @@ enum PDFOps {
             if page.rotation % 180 != 0 { size = NSSize(width: size.height, height: size.width) }
             let thumb = page.thumbnail(of: NSSize(width: size.width * 2, height: size.height * 2), for: .mediaBox)
             guard let cg = thumb.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
-            let out = Output.url(for: url, ext: ext, suffix: doc.pageCount > 1 ? "p\(i + 1)" : nil)
+            let out = Output.url(for: original ?? url, ext: ext, suffix: doc.pageCount > 1 ? "p\(i + 1)" : nil)
             try ImageOps.encode(ImageOps.flatten(cg), ext: ext).write(to: out)
             return out
         }

@@ -7,6 +7,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var dropZone: DropZone?
     private let loginItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLogin), keyEquivalent: "")
     private let iconMenu = NSMenu()
+    private let updateItem = NSMenuItem(title: "Check for Updates…", action: #selector(updateClicked), keyEquivalent: "u")
+    /// A newer release found by the quiet check at launch.
+    private var pendingRelease: Updater.Release?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -17,6 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if Shell.find("ffmpeg") == nil {
             Toast.show("Dial: video & audio need ffmpeg — run “brew install ffmpeg”")
         }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in self?.checkForUpdates(quietly: true) }
     }
 
     private func buildMenu() -> NSMenu {
@@ -37,6 +41,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(iconItem)
         loginItem.target = self
         menu.addItem(loginItem)
+        menu.addItem(.separator())
+        updateItem.target = self
+        menu.addItem(updateItem)
+        let version = NSMenuItem(title: "Dial \(Updater.currentVersion)", action: nil, keyEquivalent: "")
+        version.isEnabled = false
+        menu.addItem(version)
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit Dial", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         return menu
@@ -70,6 +80,45 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         iconMenu.addItem(withTitle: "Choose Custom Image…", action: #selector(chooseCustomIcon), keyEquivalent: "").target = self
         iconMenu.addItem(withTitle: "Reset to Default", action: #selector(resetIcon), keyEquivalent: "").target = self
+    }
+
+    // MARK: Updates
+
+    @objc private func updateClicked() {
+        if let release = pendingRelease { offer(release) } else { checkForUpdates(quietly: false) }
+    }
+
+    /// Quietly, only the menu item changes; otherwise every outcome is reported.
+    private func checkForUpdates(quietly: Bool) {
+        if !quietly { Toast.show("Checking for updates…") }
+        Updater.fetchLatest { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success(let release) where Updater.isNewer(release.version, than: Updater.currentVersion):
+                self.pendingRelease = release
+                self.updateItem.title = "Update to Dial \(release.version)…"
+                if quietly { Toast.show("Dial \(release.version) is available — update from the menu bar") } else { self.offer(release) }
+            case .success:
+                if !quietly { Toast.show("Dial \(Updater.currentVersion) is up to date") }
+            case .failure(let error):
+                if !quietly { Toast.show("Couldn't check for updates: \(error.localizedDescription)") }
+            }
+        }
+    }
+
+    private func offer(_ release: Updater.Release) {
+        let alert = NSAlert()
+        alert.messageText = "Dial \(release.version) is available"
+        alert.informativeText = "You have \(Updater.currentVersion). Dial will download the update, replace itself and reopen."
+        alert.addButton(withTitle: "Update & Relaunch")
+        alert.addButton(withTitle: "Release Notes")
+        alert.addButton(withTitle: "Later")
+        NSApp.activate()
+        switch alert.runModal() {
+        case .alertFirstButtonReturn: Updater.install(release)
+        case .alertSecondButtonReturn: NSWorkspace.shared.open(release.page)
+        default: break
+        }
     }
 
     @objc private func useCustomIcon() {

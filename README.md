@@ -23,6 +23,7 @@ This downloads the latest release into `/Applications`, installs `ffmpeg` and `w
 3. Dial isn't notarized by Apple, so the first time, **right-click Dial.app → Open → Open**.
    (Or go to **System Settings → Privacy & Security** and click **Open Anyway**.)
 4. For video, audio and WebP: `brew install ffmpeg webp`
+5. For slides (PowerPoint, Keynote): `brew install --cask libreoffice` — or have Keynote installed
 
 **Requirements:** macOS 15.4 or later, Apple silicon (M1 or later).
 
@@ -50,11 +51,14 @@ Results are saved next to the original and revealed in Finder. Several files at 
 | **Audio** (MP3, M4A, WAV, FLAC, OGG, Opus, AIFF) | MP3, M4A, WAV, FLAC, OGG, Opus, AIFF | Compress, compress to size, trim, speed, normalize, mono, stereo, join, strip metadata, info |
 | **PDF** | PNG, JPEG, TXT, DOCX, RTF | Compress, merge, split pages, rotate, strip metadata, info |
 | **Documents** (DOCX, DOC, RTF, TXT, HTML, ODT, Markdown) | PDF, DOCX, TXT, RTF, HTML, ODT | |
+| **Slides** (PPTX, PPT, PPS, Keynote, ODP) | PDF, PPTX, PNG / JPEG (one per slide) | |
 | **Subtitles** | SRT, VTT, ASS | |
 | **Archives** | Extract ZIP, TAR, GZ, RAR, 7z | |
 | **Anything** | ZIP, TAR.GZ | |
 
 Everything runs locally on your Mac. Nothing is uploaded.
+
+Dial checks GitHub for a new version at launch; choose **Check for Updates…** in the menu bar menu to update in place.
 
 Also in the menu bar menu: a **drop window**, a **floating shelf** for parking files, **launch at login**, and a choice of **menu bar icons** (or your own image).
 

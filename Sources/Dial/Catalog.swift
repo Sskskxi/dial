@@ -2,7 +2,7 @@ import AppKit
 import UniformTypeIdentifiers
 
 enum FileKind {
-    case image, video, audio, pdf, document, subtitle, archive, folder, other
+    case image, video, audio, pdf, document, presentation, subtitle, archive, folder, other
 
     static let extensions: [FileKind: Set<String>] = [
         .image: ["jpg", "jpeg", "png", "heic", "heif", "webp", "tiff", "tif", "bmp", "gif", "svg", "ico", "avif"],
@@ -10,6 +10,7 @@ enum FileKind {
         .audio: ["mp3", "m4a", "wav", "flac", "ogg", "opus", "aiff", "aif", "aac", "wma"],
         .pdf: ["pdf"],
         .document: ["txt", "rtf", "rtfd", "doc", "docx", "odt", "html", "htm", "md", "markdown", "webarchive"],
+        .presentation: ["ppt", "pptx", "pps", "ppsx", "pot", "potx", "key", "odp"],
         .subtitle: ["srt", "vtt", "ass"],
         .archive: ["zip", "tar", "gz", "tgz", "rar", "7z", "bz2", "xz"],
     ]
@@ -82,6 +83,7 @@ enum Catalog {
         case "mp4", "mov", "mkv", "webm", "avi", "wmv": return "film"
         case "mp3", "m4a", "wav", "flac", "ogg", "opus", "aiff": return "waveform"
         case "zip", "tar.gz": return "doc.zipper"
+        case "pptx": return "rectangle.on.rectangle.angled"
         case "txt": return "doc.plaintext"
         case "html": return "chevron.left.forwardslash.chevron.right"
         case "srt", "vtt", "ass": return "captions.bubble"
@@ -121,6 +123,9 @@ enum Catalog {
                 + convert(["docx", "rtf"]) { url, ext, _ in [try PDFOps.toDocument(url, ext: ext)] }
         case .document:
             items = convert(["pdf", "docx", "txt", "rtf", "html", "odt"]) { url, ext, _ in [try DocOps.convert(url, to: ext)] }
+        case .presentation:
+            items = convert(["pdf", "pptx"]) { url, ext, _ in [try SlideOps.convert(url, to: ext)] }
+                + convert(["png", "jpg"]) { url, ext, _ in try SlideOps.toImages(url, ext: ext) }
         case .subtitle:
             items = convert(["srt", "vtt", "ass"]) { url, ext, _ in [try SubtitleOps.convert(url, to: ext)] }
         case .archive:
